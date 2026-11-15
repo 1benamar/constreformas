@@ -38,13 +38,17 @@
   var cab = $("[data-cab]"), portada = $("[data-portada]"), barra = $("[data-barra-movil]");
   var fueraPortada = false, enContacto = false;
   function pintarBarra() { if (barra) barra.classList.toggle("visible", fueraPortada && !enContacto); }
-  al(portada, function (el, dentro) {
-    fueraPortada = !dentro;
-    cab.classList.toggle("cab--solida", !dentro);
+  // Sin rootMargin negativo (algunos Chrome lo ignoran): se mira cuánto de la portada queda bajo la cabecera
+  var umbrales = []; for (var u = 0; u <= 20; u++) umbrales.push(u / 20);
+  al(portada, function (el, dentro, e) {
+    var alto = (cab && cab.offsetHeight) || 76;
+    var visible = e ? (e.isIntersecting && e.boundingClientRect.bottom > alto + 1) : dentro;
+    fueraPortada = !visible;
+    cab.classList.toggle("cab--solida", !visible);
     pintarBarra();
-  }, { rootMargin: "-" + ((cab && cab.offsetHeight) || 76) + "px 0px 0px 0px" });
+  }, { threshold: umbrales });
   al($("#contacto"), function (el, dentro) { enContacto = dentro; pintarBarra(); }, { rootMargin: "-45% 0px -45% 0px" });
-  requestAnimationFrame(function () { setTimeout(function () { portada && portada.classList.add("lista"); }, 60); });
+  requestAnimationFrame(function () { setTimeout(function () { portada && portada.classList.add("preparada"); }, 60); });
 
   /* ---------- Menú móvil ---------- */
   var botonMenu = $("[data-menu-abrir]"), menu = $("[data-menu]");
@@ -71,8 +75,17 @@
   }
 
   /* ---------- Apariciones al entrar en pantalla ---------- */
-  unaVez($$(".revela, .foto--revela, [data-pasos], [data-nota], [data-mapa]"), function (el) { el.classList.add("visible"); });
+  unaVez($$(".revela, .foto--revela, [data-pasos], [data-nota], [data-mapa], [data-aparece]"), function (el) { el.classList.add("visible"); });
   unaVez([$("[data-pie]")].filter(Boolean), function (el) { el.classList.add("visible"); }, { rootMargin: "0px 0px -5% 0px" });
+
+  /* ---------- Menú: marca la sección que se está viendo ---------- */
+  var enlacesNav = $$(".cab__nav a");
+  if (hayIO && enlacesNav.length) {
+    var marcar = function (id) { enlacesNav.forEach(function (a) { if (a.getAttribute("href") === "#" + id) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); }); };
+    var espia = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) marcar(e.target.id); }); }, { rootMargin: "-45% 0px -50% 0px" });
+    enlacesNav.forEach(function (a) { var s = doc.getElementById(a.getAttribute("href").slice(1)); if (s) espia.observe(s); });
+    al(portada, function (el, dentro) { if (dentro) marcar(""); });
+  }
 
   /* ---------- Horario en directo (hora de Lloret de Mar) ---------- */
   var estados = $$("[data-estado]");

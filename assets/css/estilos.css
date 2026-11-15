@@ -75,7 +75,7 @@ p{ text-wrap: pretty; }
 .portada .resalte, .empresa .resalte, .muestrario .resalte, .exteriores .resalte, .proceso .resalte, .contacto .resalte{ color: var(--amarillo); background-image: linear-gradient(currentColor, currentColor); background-size: 100% 0.07em; background-position: 0 98%; }
 .proceso .resalte{ color: #fff; background-image: linear-gradient(var(--amarillo), var(--amarillo)); background-size: 100% 0.14em; }
 .js .portada .resalte{ background-size: 0% 0.07em; transition: background-size 1100ms var(--ease-out) 700ms; }
-.js .portada.lista .resalte{ background-size: 100% 0.07em; }
+.js .portada.preparada .resalte{ background-size: 100% 0.07em; }
 .js :is(.empresa, .muestrario, .exteriores, .contacto) .revela .resalte{ background-size: 0% 0.07em; }
 .js :is(.empresa, .muestrario, .exteriores, .contacto) .revela.visible .resalte{ background-size: 100% 0.07em; }
 .js .proceso .revela .resalte{ background-size: 0% 0.14em; }
@@ -654,7 +654,7 @@ html.visor-abierto{ overflow: hidden; }
   text-decoration-line: underline; text-decoration-color: var(--amarillo); text-decoration-thickness: 0.07em; text-underline-offset: 0.1em; text-decoration-skip-ink: auto;
   transition: text-decoration-color 600ms ease 300ms;
 }
-.js .portada:not(.lista) .resalte, .js :is(.empresa, .muestrario, .exteriores, .proceso, .contacto) .revela:not(.visible) .resalte{ text-decoration-color: transparent; }
+.js .portada:not(.preparada) .resalte, .js :is(.empresa, .muestrario, .exteriores, .proceso, .contacto) .revela:not(.visible) .resalte{ text-decoration-color: transparent; }
 
 /* Plano: rótulos con línea de llamada y punto sobre el elemento que nombran */
 .plano__llamadas .t{ stroke: var(--amarillo); stroke-width: 1.6; }
@@ -692,3 +692,97 @@ html.visor-abierto{ overflow: hidden; }
   .paso p{ max-width: 30ch; margin-inline: auto; }
   .paso:not(:last-child)::after, .paso:not(:last-child)::before{ left: calc(50% + 36px + 14px); right: calc(50% + 36px + 14px - 100% - var(--hueco)); right: auto; width: calc(100% + var(--hueco) - 72px - 28px); }
 }
+
+/* ---------- Detalles de movimiento ---------- */
+@media (prefers-reduced-motion: no-preference){
+  /* Entradas escalonadas de listas y rejillas */
+  .js [data-aparece] > li{ opacity: 0; transform: translateY(12px); transition: opacity 450ms var(--ease-out), transform 550ms var(--ease-out); }
+  .js [data-aparece].visible > li{ opacity: 1; transform: none; }
+  .js [data-aparece] > li:nth-child(1){ transition-delay: 0ms; }
+  .js [data-aparece] > li:nth-child(2){ transition-delay: 55ms; }
+  .js [data-aparece] > li:nth-child(3){ transition-delay: 110ms; }
+  .js [data-aparece] > li:nth-child(4){ transition-delay: 165ms; }
+  .js [data-aparece] > li:nth-child(5){ transition-delay: 220ms; }
+  .js [data-aparece] > li:nth-child(6){ transition-delay: 275ms; }
+  .js [data-aparece] > li:nth-child(7){ transition-delay: 330ms; }
+  .js [data-aparece] > li:nth-child(8){ transition-delay: 385ms; }
+  .js [data-aparece] > li:nth-child(9){ transition-delay: 440ms; }
+  .js [data-aparece] > li:nth-child(10){ transition-delay: 495ms; }
+  .js .lista li{ opacity: 0; transform: translateX(-8px); transition: opacity 400ms var(--ease-out), transform 500ms var(--ease-out); }
+  .js .lista.visible li{ opacity: 1; transform: none; }
+  .js .lista li:nth-child(1){ transition-delay: 270ms; }
+  .js .lista li:nth-child(2){ transition-delay: 340ms; }
+  .js .lista li:nth-child(3){ transition-delay: 410ms; }
+  .js .lista li:nth-child(4){ transition-delay: 480ms; }
+
+  /* Filete amarillo que crece bajo cada cifra */
+  .dato__cifra{ position: relative; padding-bottom: 0.75rem; }
+  .dato__cifra::after{ content: ""; position: absolute; left: 50%; bottom: 0; width: 2.5rem; height: 3px; margin-left: -1.25rem; background: var(--amarillo); transform: scaleX(0); transition: transform 700ms var(--ease-out) 300ms; }
+  .dato.visible .dato__cifra::after{ transform: scaleX(1); }
+
+  /* Brillo al pasar por los botones rellenos y otros gestos al pasar el ratón */
+  .boton--verde, .boton--amarillo{ overflow: hidden; }
+  .boton--verde::after, .boton--amarillo::after{ content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent); transform: skewX(-18deg); pointer-events: none; }
+  @media (hover: hover) and (pointer: fine){
+    .boton--verde:hover::after, .boton--amarillo:hover::after{ animation: brillo 700ms var(--ease-out); }
+    a.dato-contacto:hover .ico{ animation: timbre 500ms var(--ease-out); }
+    .pie__nav a, .pie__contacto a{ background: linear-gradient(var(--amarillo), var(--amarillo)) 0 100% / 0 2px no-repeat; transition: background-size 260ms var(--ease-out), color 200ms ease; }
+    .pie__nav a:hover, .pie__contacto a:hover{ background-size: 100% 2px; }
+    .paso:hover .paso__icono{ transform: translateY(-3px); }
+    .lista:hover{ transform: translateY(-3px); box-shadow: 0 30px 44px -30px rgba(23,37,29,0.5); }
+  }
+  .lista{ transition: opacity 450ms var(--ease-out), transform 300ms var(--ease-out), box-shadow 300ms ease; }
+  @keyframes brillo{ to{ left: 130%; } }
+  @keyframes timbre{ 0%,100%{ transform: rotate(0); } 25%{ transform: rotate(-12deg); } 50%{ transform: rotate(10deg); } 75%{ transform: rotate(-5deg); } }
+
+  /* Chips y campos del formulario */
+  .chip input:checked + span{ animation: marcar 260ms var(--ease-out); }
+  @keyframes marcar{ from{ transform: scale(0.94); } }
+  .campo:focus-within > label{ color: var(--amarillo); transition: color 200ms ease; }
+
+  /* Muestra elegida: ligero acercamiento */
+  .muestra[aria-pressed="true"] img{ transform: scale(1.08); }
+}
+.captura [data-aparece] > li, .captura .lista li{ opacity: 1 !important; transform: none !important; }
+.captura .dato__cifra::after{ transform: scaleX(1); }
+/* Menú: sección que se está viendo */
+.cab__nav a[aria-current="true"]::after{ transform: scaleX(1); }
+
+/* ---------- Tarjetas de obra nueva: entrada y gestos con más intención ---------- */
+.lista{ position: relative; overflow: hidden; }
+.lista::before{ content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--verde); transform: scaleX(0); transform-origin: left; transition: transform 500ms var(--ease-out); }
+.lista:nth-child(2)::before{ background: var(--amarillo); }
+.lista h3::before{ transform-origin: left; }
+.lista li{ border-radius: 0; }
+@media (prefers-reduced-motion: no-preference){
+  /* Entrada: la tarjeta se destapa de abajo arriba, la barra de color crece y cada línea entra con su marca */
+  .js .lista{ clip-path: inset(100% 0 0 0); transition: clip-path 800ms var(--ease-in-out), opacity 450ms ease, transform 300ms var(--ease-out), box-shadow 300ms ease; }
+  .js .lista.visible{ clip-path: inset(0 0 0 0); }
+  .js .lista:nth-child(2){ transition-delay: 150ms, 150ms, 0ms, 0ms; }
+  .js .lista h3::before{ transform: scaleX(0); transition: transform 600ms var(--ease-out) 500ms; }
+  .js .lista.visible h3::before{ transform: scaleX(1); }
+  .js .lista:nth-child(2) h3::before{ transition-delay: 650ms; }
+  .js .lista h3{ opacity: 0; transform: translateY(8px); transition: opacity 450ms var(--ease-out) 420ms, transform 550ms var(--ease-out) 420ms; }
+  .js .lista.visible h3{ opacity: 1; transform: none; }
+  .js .lista li{ opacity: 1 !important; transform: none !important; transition: transform 250ms var(--ease-out) !important; }
+  .js .lista li .ico{ transform: scale(0) rotate(-60deg); transition: transform 500ms cubic-bezier(0.34, 1.4, 0.64, 1); }
+  .js .lista li span{ display: inline-block; opacity: 0; transform: translateX(-10px); clip-path: inset(0 100% 0 0); transition: opacity 400ms ease, transform 600ms var(--ease-out), clip-path 700ms var(--ease-out); }
+  .js .lista.visible li .ico{ transform: none; }
+  .js .lista.visible li span{ opacity: 1; transform: none; clip-path: inset(0 0 0 0); }
+  .js .lista li:nth-child(1) .ico{ transition-delay: 700ms; } .js .lista li:nth-child(1) span{ transition-delay: 760ms; }
+  .js .lista li:nth-child(2) .ico{ transition-delay: 820ms; } .js .lista li:nth-child(2) span{ transition-delay: 880ms; }
+  .js .lista li:nth-child(3) .ico{ transition-delay: 940ms; } .js .lista li:nth-child(3) span{ transition-delay: 1000ms; }
+  .js .lista li:nth-child(4) .ico{ transition-delay: 1060ms; } .js .lista li:nth-child(4) span{ transition-delay: 1120ms; }
+  .js .lista:nth-child(2) li .ico, .js .lista:nth-child(2) li span{ margin-left: 0; }
+
+  /* Al pasar el ratón: la barra recorre todo el borde y la línea señalada se desplaza */
+  @media (hover: hover) and (pointer: fine){
+    .lista:hover::before{ transform: scaleX(1); }
+    .lista:hover h3::before{ transform: scaleX(1.6); transition-delay: 0ms; }
+    .js .lista.visible li:hover{ transform: translateX(6px) !important; }
+    .js .lista.visible li:hover .ico{ transform: scale(1.25); transition-delay: 0ms; color: var(--verde-osc); }
+    .lista:nth-child(2) li:hover .ico{ color: #B08300; }
+  }
+}
+.captura .lista{ clip-path: none !important; }
+.captura .lista h3, .captura .lista li .ico, .captura .lista li span{ opacity: 1 !important; transform: none !important; clip-path: none !important; }
