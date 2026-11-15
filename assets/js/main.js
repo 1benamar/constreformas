@@ -114,7 +114,7 @@
 
   /* ---------- Portada: pase de obras con la regla ---------- */
   var pases = $$("[data-pase]"), tramos = $$("[data-ir]"), regla = $("[data-regla]"), pausa = $("[data-pases-pausa]"), pie = $("[data-pase-pie]");
-  var actual = 0, pausadoPorUsuario = reducir, pausadoPorSistema = false;
+  var actual = 0, pausadoPorUsuario = false, pausadoPorSistema = false;
   function cargarPase(n) {
     var f = pases[n]; if (!f) return;
     $$("[data-srcset]", f).forEach(function (s) { s.setAttribute("srcset", s.getAttribute("data-srcset")); s.removeAttribute("data-srcset"); });
@@ -158,6 +158,11 @@
       });
     });
     if (pausa) pausa.addEventListener("click", function () { pausadoPorUsuario = !pausadoPorUsuario; pintarPausa(); });
+    if (regla) {
+      var sobre = function (v) { return function () { pausadoPorUsuario = v; pintarPausa(); }; };
+      regla.addEventListener("pointerenter", sobre(true)); regla.addEventListener("pointerleave", sobre(false));
+      regla.addEventListener("focusin", sobre(true)); regla.addEventListener("focusout", sobre(false));
+    }
     doc.addEventListener("visibilitychange", function () { pausadoPorSistema = doc.hidden; pintarPausa(); });
     al(portada, function (el, dentro) { if (!doc.hidden) { pausadoPorSistema = !dentro; pintarPausa(); } }, { threshold: 0.15 });
     pausadoPorSistema = doc.hidden;
@@ -361,7 +366,7 @@
       pic.innerHTML = '<source type="image/avif" srcset="' + srcsetDe(f, "avif") + '" sizes="(min-width: 900px) 48vw, 100vw"><img src="assets/img/' + f.id + "-" + f.a[Math.min(1, f.a.length - 1)] + '.webp" srcset="' + srcsetDe(f, "webp") + '" sizes="(min-width: 900px) 48vw, 100vw" alt="' + f.alt.replace(/"/g, "&quot;") + '" width="' + f.w + '" height="' + f.h + '">';
       marco.appendChild(pic);
       var viejas = $$("picture", marco).slice(0, -1);
-      setTimeout(function () { viejas.forEach(function (v) { v.remove(); }); }, reducir ? 0 : 820);
+      setTimeout(function () { viejas.forEach(function (v) { v.remove(); }); }, reducir ? 0 : 520);
       nombre.textContent = b.getAttribute("data-nombre");
       donde.textContent = b.getAttribute("data-donde");
     };
@@ -407,21 +412,6 @@
     carrusel.addEventListener("focusout", function () { cSistema = false; pintarCPausa(); });
     al(carrusel, function (el, dentro) { cSistema = !dentro || doc.hidden; pintarCPausa(); }, { threshold: 0.4 });
     irCita(0); pintarCPausa();
-  }
-
-  /* ---------- Anillo «Ver» sobre las fotos (solo ratón) ---------- */
-  var anillo = $("[data-anillo]");
-  if (anillo && window.matchMedia("(hover: hover) and (pointer: fine)").matches && !reducir) {
-    var ax = -200, ay = -200, pendiente = false;
-    var mover = function () { anillo.style.setProperty("--x", ax + "px"); anillo.style.setProperty("--y", ay + "px"); pendiente = false; };
-    doc.addEventListener("pointermove", function (e) {
-      if (e.pointerType !== "mouse") return;
-      ax = e.clientX; ay = e.clientY;
-      var sobre = e.target.closest && e.target.closest(".foto") && !e.target.closest(".arrastrando");
-      anillo.classList.toggle("activo", !!sobre);
-      if (!pendiente) { pendiente = true; requestAnimationFrame(mover); }
-    }, { passive: true });
-    doc.addEventListener("pointerleave", function () { anillo.classList.remove("activo"); });
   }
 
   /* ---------- Formulario: prepara el correo (no envía datos a ningún servidor) ---------- */
